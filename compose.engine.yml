@@ -1,0 +1,8 @@
+# Runs the example against an engine checkout instead of the released gem:
+#   WARP_ENGINE_SOURCE=../warp_engine docker compose -f docker-compose.yml -f compose.engine.yml up -d --build
+services:
+  app:
+    environment:
+      WARP_ENGINE_PATH: /warp_engine
+    volumes:
+      - ${WARP_ENGINE_SOURCE:?set WARP_ENGINE_SOURCE to an engine checkout}:/warp_engine

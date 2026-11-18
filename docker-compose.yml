@@ -1,8 +1,8 @@
 # Example stack: everything WarpEngine needs to come alive, end to end.
 #
 #   mysql             the catalog database
-#   app               a Rails host with the engine mounted from this repo
-#                     checkout, ActiveAdmin + Devise for the admin at /admin
+#   app               a Rails host with the warp_engine gem from the TTG gem registry,
+#                     ActiveAdmin + Devise for the admin at /admin
 #   shelf-http        the C64 and Plus/4 shelves over plain HTTP (WARP64U), port 8090
 #   shelf-ftp         the shelves over FTP (DOSINST), port 2121
 #   gitea             (profile "ci") the git forge
@@ -14,6 +14,9 @@
 # Only the catalog and the admin:
 #   cp .env.example .env
 #   docker compose up -d --build
+#
+# Against an engine checkout instead of the released gem:
+#   WARP_ENGINE_SOURCE=../warp_engine docker compose -f docker-compose.yml -f compose.engine.yml up -d --build
 
 services:
   mysql:
@@ -48,12 +51,12 @@ services:
       WOODPECKER_URL: ${WOODPECKER_URL:-}
       WOODPECKER_API_TOKEN: ${WOODPECKER_API_TOKEN:-}
       WOODPECKER_PUBLIC_KEY_URL: ${WOODPECKER_PUBLIC_KEY_URL:-}
+      WARP_ENGINE_VERSION: ${WARP_ENGINE_VERSION:-~> 5.1}
     depends_on:
       mysql:
         condition: service_healthy
     volumes:
       - ./host_app:/app
-      - ../..:/warp_engine
       - bundle:/usr/local/bundle
       - softwares:/softwares
       - images:/images

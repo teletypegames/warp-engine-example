@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# The app source, the engine checkout (/warp_engine) and the bundle are all
-# mounted at runtime by the compose file; the entrypoint bundles on first boot.
+# The app source and the bundle are mounted at runtime by the compose file
+# (compose.engine.yml adds an engine checkout); the entrypoint bundles on first boot.
 ENTRYPOINT ["./bin/docker-entrypoint"]
 
 EXPOSE 3000
