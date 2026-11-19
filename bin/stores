@@ -1,0 +1,92 @@
+#!/bin/sh
+# Points every store at this catalog in one go, for the devices on your local
+# network: the shelves announce your machine's address, Batocera and RetroArch
+# get their config and installer, WARP64U (C64) and DOSINST (DOS) come into the
+# catalog from teletypegames.org, and a ready disk image and zip carry them with
+# their settings. Run it again any time, e.g. when your address changes.
+#
+#   bin/stores                         your machine's address, found by itself
+#   bin/stores 192.168.1.20            that address
+#   bin/stores --name "My Studio" --id mystudio --logo logo.png
+set -eu
+
+cd "$(dirname "$0")/.."
+
+address=""
+name=""
+id=""
+logo=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --name) name="${2:?--name needs a name}"; shift 2 ;;
+    --id) id="${2:?--id needs an id}"; shift 2 ;;
+    --logo) logo="${2:?--logo needs a URL or an image file}"; shift 2 ;;
+    -h|--help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -*) echo "unknown option: $1" >&2; exit 2 ;;
+    *) address="$1"; shift ;;
+  esac
+done
+
+[ -f .env ] || { echo "No .env yet: run bin/setup first." >&2; exit 1; }
+
+get() { sed -n "s/^$1=//p" .env | tail -n 1; }
+or_default() { value=$(get "$1"); [ -n "$value" ] && printf '%s' "$value" || printf '%s' "$2"; }
+set_env() {
+  if grep -q "^$1=" .env; then
+    sed "s|^$1=.*|$1=$2|" .env > .env.new && mv .env.new .env
+  else
+    printf '%s=%s\n' "$1" "$2" >> .env
+  fi
+}
+detect_address() {
+  case "$(uname)" in
+    Darwin)
+      for interface in en0 en1 en2 en3; do
+        found=$(ipconfig getifaddr "$interface" 2>/dev/null || true)
+        [ -n "$found" ] && { printf '%s' "$found"; return; }
+      done ;;
+    *) ip route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p' ;;
+  esac
+}
+rails() { docker compose exec -T app bin/rails "$@"; }
+
+[ -n "$address" ] || address=$(detect_address)
+[ -n "$address" ] || { echo "Could not find your address on the local network: bin/stores 192.168.1.20" >&2; exit 1; }
+[ -n "$name" ] || name=$(or_default STORE_NAME "My Studio")
+[ -n "$id" ] || id=$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-//; s/-$//')
+
+APP_PORT=$(or_default APP_PORT 8080)
+SHELF_HTTP_PORT=$(or_default SHELF_HTTP_PORT 8090)
+SHELF_FTP_PORT=$(or_default SHELF_FTP_PORT 2121)
+catalog="http://$address:$APP_PORT"
+
+echo "1. The catalog and its shelves at $address"
+set_env STORE_NAME "$name"
+set_env SHELF_HTTP_URL "http://$address:$SHELF_HTTP_PORT"
+set_env SHELF_FTP_URL "ftp://$address:$SHELF_FTP_PORT"
+set_env SHELF_FTP_ADDRESS "$address"
+docker compose up -d --build app shelf-http shelf-ftp >/dev/null 2>&1
+printf '  waiting for the catalog '
+tries=0
+until curl -fs -o /dev/null "http://localhost:$APP_PORT/api/service"; do
+  tries=$((tries + 1))
+  [ "$tries" -gt 120 ] && { echo " gave up"; exit 1; }
+  printf '.'; sleep 5
+done
+echo " ok"
+
+echo "2. Batocera and RetroArch"
+for client in batocera retroarch; do
+  if [ -n "$logo" ]; then
+    rails g warp_engine:store "$client" --base-url "$catalog" --name "$name" --id "$id" --logo "$logo" --force >/dev/null
+  else
+    rails g warp_engine:store "$client" --base-url "$catalog" --name "$name" --id "$id" --force >/dev/null
+  fi
+  echo "  $client: public/stores/$client/config.json and install.sh"
+done
+
+echo "3. The C64 and DOS clients"
+docker compose exec -T -e STORES_ADDRESS="$address" -e STORES_NAME="$name" -e STORES_ID="$id" \
+  -e APP_PORT="$APP_PORT" -e SHELF_HTTP_PORT="$SHELF_HTTP_PORT" -e SHELF_FTP_PORT="$SHELF_FTP_PORT" \
+  app bin/rails runner script/stores.rb
+rails warp_engine:outlets:sync >/dev/null

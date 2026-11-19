@@ -103,6 +103,33 @@ newer set when you are ready:
 The project templates and demos (`platform_tooling`, `ref: master`) and the web
 shells follow their `master` branch: they only matter when a new game starts.
 
+## Stores for your devices
+
+One command points every store at this catalog, for the devices on your local network:
+
+```sh
+bin/stores                                  # your machine's address, found by itself
+bin/stores 192.168.1.20 --name "My Studio"  # or name it (--id, --logo too)
+```
+
+It writes your address into `.env` (`SHELF_HTTP_URL`, `SHELF_FTP_URL`, `SHELF_FTP_ADDRESS`),
+restarts the catalog and the shelves, runs `rails g warp_engine:store` for Batocera and
+RetroArch, copies the newest WARP64U (C64) and DOSINST (DOS) from teletypegames.org into your
+catalog (released, so they are on your shelves and update themselves from there), and builds
+the two with their settings:
+
+| Device | What to do |
+| --- | --- |
+| Batocera | `curl -fsSL http://ADDRESS:8080/stores/batocera/install.sh \| sh` on the box |
+| RetroArch | `curl -fsSL http://ADDRESS:8080/stores/retroarch/install.sh \| sh` |
+| C64 | `http://ADDRESS:8080/stores/c64/<id>.d64`: WARP64U and its `WARP64U.CFG` on one disk image, for the Ultimate's SD card or VICE |
+| DOS | `http://ADDRESS:8080/stores/dos/dosinst.zip`: DOSINST with its `DOSINST.CFG`; unpack and run `DOSINST.EXE` |
+| Desktop | the WarpEngine Client takes `http://ADDRESS:8080` on its first run |
+
+It prints these lines with your address at the end. Run it again whenever your address changes.
+The generated files live in `host_app/public/stores/` (not in git). The disk image is written by
+`host_app/lib/studio/d64.rb`, no VICE needed.
+
 ## The engine version
 
 The host takes the `warp_engine` gem from the TTG gem registry
