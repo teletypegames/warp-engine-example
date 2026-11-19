@@ -48,7 +48,6 @@ Rails.application.config.to_prepare do
 
     runtime :emulatorjs, version: "4.2.3"
 
-    forge :gitea, url: ENV["GITEA_URL"], token: ENV["GITEA_API_TOKEN"], owner: ENV.fetch("GITEA_OWNER", "games")
 
     shelf_http = ENV.fetch("SHELF_HTTP_URL", "http://localhost:8090")
     shelf_ftp = ENV.fetch("SHELF_FTP_URL", "ftp://localhost:2121")
@@ -67,11 +66,16 @@ Rails.application.config.to_prepare do
       public_openapi
     end
 
+    local_components do
+      enable
+      name_prefix "warp-example"
+      network "warp-example"
+      engine_url "http://app:3000"
+      forge_port ENV.fetch("GITEA_PORT", "3000")
+      ci_port ENV.fetch("WOODPECKER_PORT", "8000")
+    end
+
     ci :woodpecker do
-      url            ENV["WOODPECKER_URL"]
-      api_token      ENV["WOODPECKER_API_TOKEN"]
-      repo_owner     ENV.fetch("GITEA_OWNER", "games")
-      public_key_url ENV["WOODPECKER_PUBLIC_KEY_URL"]
       update_server  ENV.fetch("UPDATE_SERVER", "http://app:3000")
       tools          TOOLS_IMAGE
 
