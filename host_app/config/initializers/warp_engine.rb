@@ -66,6 +66,12 @@ Rails.application.config.to_prepare do
       public_openapi
     end
 
+    forks do
+      announce true
+      accept_announcements true
+      allow_private_engines ENV["FORKS_ALLOW_PRIVATE_ENGINES"] == "1"
+    end
+
     local_components do
       enable
       name_prefix "warp-example"
