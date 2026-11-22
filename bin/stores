@@ -1,9 +1,9 @@
 #!/bin/sh
 # Points every store at this catalog in one go, for the devices on your local
-# network: the shelves announce your machine's address, Batocera and RetroArch
-# get their config and installer, WE64 (C64) and WEDOS (DOS) come into the
-# catalog from teletypegames.org, and a ready disk image and zip carry them with
-# their settings. Run it again any time, e.g. when your address changes.
+# network: the shelves announce your machine's address, the Batocera and
+# RetroArch store engines, WE64 (C64) and WEDOS (DOS) come into the catalog from
+# teletypegames.org (the catalog serves the first two with their installers), and
+# a ready disk image and zip carry the last two with their settings. Run it again any time, e.g. when your address changes.
 #
 #   bin/stores                         your machine's address, found by itself
 #   bin/stores 192.168.1.20            that address
@@ -75,18 +75,8 @@ until curl -fs -o /dev/null "http://localhost:$APP_PORT/api/service"; do
 done
 echo " ok"
 
-echo "2. Batocera and RetroArch"
-for client in batocera retroarch; do
-  if [ -n "$logo" ]; then
-    rails g warp_engine:store "$client" --base-url "$catalog" --name "$name" --id "$id" --logo "$logo" --force >/dev/null
-  else
-    rails g warp_engine:store "$client" --base-url "$catalog" --name "$name" --id "$id" --force >/dev/null
-  fi
-  echo "  $client: public/stores/$client/config.json and install.sh"
-done
-
-echo "3. The C64 and DOS clients"
-docker compose exec -T -e STORES_ADDRESS="$address" -e STORES_NAME="$name" -e STORES_ID="$id" \
+echo "2. The store engines and the C64 and DOS clients"
+docker compose exec -T -e STORES_ADDRESS="$address" -e STORES_NAME="$name" -e STORES_ID="$id" -e STORES_LOGO="$logo" \
   -e APP_PORT="$APP_PORT" -e SHELF_HTTP_PORT="$SHELF_HTTP_PORT" -e SHELF_FTP_PORT="$SHELF_FTP_PORT" \
   app bin/rails runner script/stores.rb
 rails warp_engine:outlets:sync >/dev/null

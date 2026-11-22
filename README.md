@@ -113,15 +113,15 @@ bin/stores 192.168.1.20 --name "My Studio"  # or name it (--id, --logo too)
 ```
 
 It writes your address into `.env` (`SHELF_HTTP_URL`, `SHELF_FTP_URL`, `SHELF_FTP_ADDRESS`),
-restarts the catalog and the shelves, runs `rails g warp_engine:store` for Batocera and
-RetroArch, copies the newest WE64 (C64) and WEDOS (DOS) from teletypegames.org into your
-catalog (released, so they are on your shelves and update themselves from there), and builds
-the two with their settings:
+restarts the catalog and the shelves, copies the newest Batocera and RetroArch store engines,
+WE64 (C64) and WEDOS (DOS) from teletypegames.org into your catalog (released, so they update
+themselves from there), names the two store engines after your store, and builds WE64 and
+WEDOS with their settings:
 
 | Device | What to do |
 | --- | --- |
-| Batocera | `curl -fsSL http://ADDRESS:8080/stores/batocera/install.sh \| sh` on the box |
-| RetroArch | `curl -fsSL http://ADDRESS:8080/stores/retroarch/install.sh \| sh` |
+| Batocera | `curl -fsSL http://ADDRESS:8080/api/stores/batocera/install.sh \| sh` on the box |
+| RetroArch | `curl -fsSL http://ADDRESS:8080/api/stores/retroarch/install.sh \| sh` |
 | C64 | `http://ADDRESS:8080/stores/c64/<id>.d64`: WE64 and its `WE64.CFG` on one disk image, for the Ultimate's SD card or VICE |
 | DOS | `http://ADDRESS:8080/stores/dos/we-dos.zip`: WEDOS with its `WEDOS.CFG`; unpack and run `WEDOS.EXE` |
 | Desktop | the WarpEngine Desktop takes `http://ADDRESS:8080` on its first run |
@@ -144,7 +144,7 @@ WARP_ENGINE_SOURCE=../warp_engine docker compose -f docker-compose.yml -f compos
 ## More
 
 The engine README covers the rest: stores for your catalog
-(`rails g warp_engine:store`), publishing a release by hand, shelves, Sync, the
+(the store engines), publishing a release by hand, shelves, Sync, the
 Admin API. Inside this stack run the generators and rake tasks with
 `docker compose exec app bin/rails …`.
 
