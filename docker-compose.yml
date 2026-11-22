@@ -3,8 +3,8 @@
 #   mysql             the catalog database
 #   app               a Rails host with the warp_engine gem from the TTG gem registry,
 #                     ActiveAdmin + Devise for the admin at /admin
-#   shelf-http        the C64 and Plus/4 shelves over plain HTTP (WARP64U), port 8090
-#   shelf-ftp         the shelves over FTP (DOSINST), port 2121
+#   shelf-http        the C64 and Plus/4 shelves over plain HTTP (WE64), port 8090
+#   shelf-ftp         the shelves over FTP (WEDOS), port 2121
 #
 # The git server (Gitea) and the CI (Woodpecker) are not services here: the
 # engine starts and wires them itself through the Docker socket (WarpEngine 5.5
@@ -62,7 +62,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   # The shelves (C64, Plus/4, DOS) the engine writes, for the clients that read files
-  # rather than the API: WARP64U on a C64 over plain HTTP, DOSINST on DOS over FTP.
+  # rather than the API: WE64 on a C64 over plain HTTP, WEDOS on DOS over FTP.
   shelf-http:
     build:
       context: ./shelves

@@ -52,7 +52,7 @@ in through Gitea with the same administrator.
 - `http://localhost:8080/api/builds` — the platform build matrix
 - `http://localhost:8080/api/docs` — apipie API docs
 - `http://localhost:8090/` — the shelves over plain HTTP (`C64`, `PLUS4`, `APPS`),
-  for WARP64U on a C64; `ftp://localhost:2121/` — the same over FTP, for DOSINST
+  for WE64 on a C64; `ftp://localhost:2121/` — the same over FTP, for WEDOS
 
 The ports live in `.env` (`APP_PORT`, `GITEA_PORT`, `WOODPECKER_PORT`, `SHELF_HTTP_PORT`,
 `SHELF_FTP_PORT`). The git server and the CI are the engine's containers, not compose services:
@@ -114,7 +114,7 @@ bin/stores 192.168.1.20 --name "My Studio"  # or name it (--id, --logo too)
 
 It writes your address into `.env` (`SHELF_HTTP_URL`, `SHELF_FTP_URL`, `SHELF_FTP_ADDRESS`),
 restarts the catalog and the shelves, runs `rails g warp_engine:store` for Batocera and
-RetroArch, copies the newest WARP64U (C64) and DOSINST (DOS) from teletypegames.org into your
+RetroArch, copies the newest WE64 (C64) and WEDOS (DOS) from teletypegames.org into your
 catalog (released, so they are on your shelves and update themselves from there), and builds
 the two with their settings:
 
@@ -122,9 +122,9 @@ the two with their settings:
 | --- | --- |
 | Batocera | `curl -fsSL http://ADDRESS:8080/stores/batocera/install.sh \| sh` on the box |
 | RetroArch | `curl -fsSL http://ADDRESS:8080/stores/retroarch/install.sh \| sh` |
-| C64 | `http://ADDRESS:8080/stores/c64/<id>.d64`: WARP64U and its `WARP64U.CFG` on one disk image, for the Ultimate's SD card or VICE |
-| DOS | `http://ADDRESS:8080/stores/dos/dosinst.zip`: DOSINST with its `DOSINST.CFG`; unpack and run `DOSINST.EXE` |
-| Desktop | the WarpEngine Client takes `http://ADDRESS:8080` on its first run |
+| C64 | `http://ADDRESS:8080/stores/c64/<id>.d64`: WE64 and its `WE64.CFG` on one disk image, for the Ultimate's SD card or VICE |
+| DOS | `http://ADDRESS:8080/stores/dos/we-dos.zip`: WEDOS with its `WEDOS.CFG`; unpack and run `WEDOS.EXE` |
+| Desktop | the WarpEngine Desktop takes `http://ADDRESS:8080` on its first run |
 
 It prints these lines with your address at the end. Run it again whenever your address changes.
 The generated files live in `host_app/public/stores/` (not in git). The disk image is written by

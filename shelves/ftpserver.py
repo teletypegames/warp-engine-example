@@ -1,6 +1,6 @@
 """The shelves over FTP (needs pyftpdlib): anonymous, read-only, passive only.
 
-DOSINST, the DOS store client, lists and downloads its programs over FTP; this serves
+WEDOS, the DOS store client, lists and downloads its programs over FTP; this serves
 the folder the engine writes the shelves into (APPS, C64, PLUS4).
 
 Settings come from the environment:

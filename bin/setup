@@ -66,7 +66,7 @@ Your studio is up.
   Catalog API     http://localhost:$APP_PORT/api/software
   Gitea           http://localhost:$GITEA_PORT      $GITEA_USER / $GITEA_PASSWORD
   Woodpecker CI   http://localhost:$WOODPECKER_PORT      (sign in through Gitea)
-  Shelves         $(or_default SHELF_HTTP_URL http://localhost:8090) (HTTP, WARP64U)   $(or_default SHELF_FTP_URL ftp://localhost:2121) (FTP, DOSINST)
+  Shelves         $(or_default SHELF_HTTP_URL http://localhost:8090) (HTTP, WE64)   $(or_default SHELF_FTP_URL ftp://localhost:2121) (FTP, WEDOS)
 
 Next: install the WarpEngine Toolbox in VS Code, run "WarpEngine: Set Host…"
 with http://localhost:$APP_PORT, then "WarpEngine: Sign In" and "New Game".

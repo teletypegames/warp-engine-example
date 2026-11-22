@@ -18,36 +18,36 @@ step = ->(text) { puts "  #{text}" }
 import = Studio::ClientImport.new(source: ENV.fetch("STORES_SOURCE", "https://teletypegames.org"),
                                   local: "http://localhost:3000", secret: ENV.fetch("UPDATE_SECRET", "example-update-secret"))
 clients = {}
-%w[warp64u dosinst].each do |client|
+%w[we-c64 we-dos].each do |client|
   clients[client] = import.call(client)
   step.call("#{client} #{clients[client]} is in the catalog, released")
 end
 
-prg_path = Dir[File.join(WarpEngine.config.file_container_path.to_s, "warp64u", clients["warp64u"], "*.prg")].first or raise "no WARP64U .prg in the release"
+prg_path = Dir[File.join(WarpEngine.config.file_container_path.to_s, "we-c64", clients["we-c64"], "*.prg")].first or raise "no WE64 .prg in the release"
 disk = Studio::D64.new(name[0, 16], "01")
-  .add("warp64u", File.binread(prg_path))
-  .add("warp64u.cfg", "HOST=#{address}\nPORT=#{shelf_http_port}\nPATH=/C64\n", type: :seq)
+  .add("we-c64", File.binread(prg_path))
+  .add("we-c64.cfg", "HOST=#{address}\nPORT=#{shelf_http_port}\nPATH=/C64\n", type: :seq)
 FileUtils.mkdir_p(public_dir.join("c64"))
 File.binwrite(public_dir.join("c64/#{id}.d64"), disk.to_s)
-step.call("c64/#{id}.d64: WARP64U and its WARP64U.CFG (#{clients['warp64u']})")
+step.call("c64/#{id}.d64: WE64 and its WE64.CFG (#{clients['we-c64']})")
 
-dos_zip = Dir[File.join(WarpEngine.config.file_container_path.to_s, "dosinst", clients["dosinst"], "dosinst-#{clients['dosinst']}.zip")].first or raise "no DOSINST zip in the release"
+dos_zip = Dir[File.join(WarpEngine.config.file_container_path.to_s, "we-dos", clients["we-dos"], "we-dos-#{clients['we-dos']}.zip")].first or raise "no WEDOS zip in the release"
 FileUtils.mkdir_p(public_dir.join("dos"))
-target = public_dir.join("dos/dosinst.zip")
+target = public_dir.join("dos/we-dos.zip")
 FileUtils.cp(dos_zip, target)
-inside = IO.popen([ "unzip", "-Z1", target.to_s ], &:read).lines.map(&:chomp).find { |entry| File.basename(entry).casecmp?("DOSINST.CFG") } || "DOSINST/DOSINST.CFG"
+inside = IO.popen([ "unzip", "-Z1", target.to_s ], &:read).lines.map(&:chomp).find { |entry| File.basename(entry).casecmp?("WEDOS.CFG") } || "WEDOS/WEDOS.CFG"
 Dir.mktmpdir do |dir|
   FileUtils.mkdir_p(File.join(dir, File.dirname(inside)))
   File.binwrite(File.join(dir, inside), "SERVER=#{address}\r\nPORT=#{shelf_ftp_port}\r\nPATH=/APPS\r\nDEST=C:\\APPS\r\n")
   system("zip", "-q", target.to_s, inside, chdir: dir, exception: true)
 end
-step.call("dos/dosinst.zip: DOSINST and its DOSINST.CFG (#{clients['dosinst']})")
+step.call("dos/we-dos.zip: WEDOS and its WEDOS.CFG (#{clients['we-dos']})")
 
 puts
 puts "#{name}, for every screen (the catalog at #{app_url}):"
 puts
 puts "  Batocera     curl -fsSL #{app_url}/stores/batocera/install.sh | sh"
 puts "  RetroArch    curl -fsSL #{app_url}/stores/retroarch/install.sh | sh"
-puts "  C64          #{app_url}/stores/c64/#{id}.d64  (on the Ultimate's SD card or in VICE: LOAD \"WARP64U\",8 and RUN)"
-puts "  DOS          #{app_url}/stores/dos/dosinst.zip  (unpack, run DOSINST.EXE)"
-puts "  Desktop      the WarpEngine Client: give it #{app_url} on its first run"
+puts "  C64          #{app_url}/stores/c64/#{id}.d64  (on the Ultimate's SD card or in VICE: LOAD \"WE64\",8 and RUN)"
+puts "  DOS          #{app_url}/stores/dos/we-dos.zip  (unpack, run WEDOS.EXE)"
+puts "  Desktop      the WarpEngine Desktop: give it #{app_url} on its first run"
