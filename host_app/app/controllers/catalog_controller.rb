@@ -8,8 +8,10 @@ class CatalogController < ApplicationController
     "mac_x64" => "macOS (Intel)"
   }.freeze
 
+  APP_CATEGORIES = %w[app tool store].freeze
+
   def index
-    @apps, @games = catalog.partition { |entry| entry.dig("software", "platform") == "electron" }
+    @apps, @games = catalog.partition { |entry| APP_CATEGORIES.include?(entry.dig("software", "category")) }
   end
 
   def show

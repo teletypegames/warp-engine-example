@@ -94,6 +94,7 @@ newer set when you are ready:
 
 | Engine | Images (`git.teletypegames.org/build/…`) | Tag |
 | --- | --- | --- |
+| 5.10.0– | the same set, and `golang-builder` (`golang`) and `store-engine-builder` (`batocera`, `retroarch`) | `2026.11.24` |
 | 4.3.0– | the same set, and `electron-builder` for the `electron` platform | `2026.11.18` |
 | 4.1.6–4.2.x | the same set, with the `tic80pro` that has `tic80-export` and its own native players | `2026.11.17.3` |
 | 4.1.5 | the same set, with the `dos-builder` that fills in a missing `dos` block from the name | `2026.11.17.2` |
