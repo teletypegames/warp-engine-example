@@ -1,8 +1,8 @@
 # WarpEngine example stack
 
 A whole studio on one machine, with [WarpEngine](https://git.teletypegames.org/engines/warp_engine) at its heart: the catalog app, a Gitea
-forge and Woodpecker CI, wired together. `bin/setup` brings the catalog up, and the engine
-starts and wires the git server and the CI itself (its *local components*, through the Docker
+git server and Woodpecker CI, wired together. `bin/setup` brings the catalog up, and the engine
+starts and wires the git server and the CI itself (its *local providers*, through the Docker
 socket) — no install wizard, no OAuth app to click together, no passwords to choose — so the
 first game you push builds and lands in the catalog.
 
@@ -10,7 +10,7 @@ first game you push builds and lands in the catalog.
 | --- | --- | --- |
 | `app` | Rails host with the `warp_engine` gem, ActiveAdmin + Devise for the admin | `http://localhost:8080` |
 | `mysql` | Catalog database | internal |
-| `warp-example-gitea` | Git forge, started by the engine | `http://localhost:3000` |
+| `warp-example-gitea` | Git server, started by the engine | `http://localhost:3000` |
 | `warp-example-woodpecker` + agent | CI wired to gitea, pipelines served by the engine, started by the engine | `http://localhost:8000` |
 
 What you need: Docker with Compose, git and curl. The app container gets the Docker socket, so
@@ -51,11 +51,11 @@ in through Gitea with the same administrator.
 - `http://localhost:8080/file/starhop/1.0.0/html/index.html` — a web build
 - `http://localhost:8080/api/builds` — the platform build matrix
 - `http://localhost:8080/api/docs` — apipie API docs
-- `http://localhost:8090/` — the shelves over plain HTTP (`C64`, `PLUS4`, `APPS`),
+- `http://localhost:8090/` — the directories over plain HTTP (`C64`, `PLUS4`, `APPS`),
   for WE64 on a C64; `ftp://localhost:2121/` — the same over FTP, for WEDOS
 
-The ports live in `.env` (`APP_PORT`, `GITEA_PORT`, `WOODPECKER_PORT`, `SHELF_HTTP_PORT`,
-`SHELF_FTP_PORT`). The git server and the CI are the engine's containers, not compose services:
+The ports live in `.env` (`APP_PORT`, `GITEA_PORT`, `WOODPECKER_PORT`, `DIRECTORY_HTTP_PORT`,
+`DIRECTORY_FTP_PORT`). The git server and the CI are the engine's containers, not compose services:
 
 ```sh
 docker compose exec app bin/rails warp_engine:local:status
@@ -75,7 +75,7 @@ pipeline the engine serves builds it, tags `v1.0.0`, and the tag pipeline
 publishes the release.
 
 Without the toolbox the same works through the Admin API
-(`POST /api/admin/v1/softwares/scaffold`) and a plain `git push` of a repository
+(`POST /api/admin/v2/softwares/scaffold`) and a plain `git push` of a repository
 holding the one-line marker:
 
 ```yaml
@@ -113,8 +113,8 @@ bin/stores                                  # your machine's address, found by i
 bin/stores 192.168.1.20 --name "My Studio"  # or name it (--id, --logo too)
 ```
 
-It writes your address into `.env` (`SHELF_HTTP_URL`, `SHELF_FTP_URL`, `SHELF_FTP_ADDRESS`),
-restarts the catalog and the shelves, copies the newest Batocera and RetroArch store engines,
+It writes your address into `.env` (`DIRECTORY_HTTP_URL`, `DIRECTORY_FTP_URL`, `DIRECTORY_FTP_ADDRESS`),
+restarts the catalog and the directories, copies the newest Batocera and RetroArch store engines,
 WE64 (C64) and WEDOS (DOS) from teletypegames.org into your catalog (released, so they update
 themselves from there), names the two store engines after your store, and builds WE64 and
 WEDOS with their settings:
@@ -145,7 +145,7 @@ WARP_ENGINE_SOURCE=../warp_engine docker compose -f docker-compose.yml -f compos
 ## More
 
 The engine README covers the rest: stores for your catalog
-(the store engines), publishing a release by hand, shelves, Sync, the
+(the store engines), publishing a release by hand, directories, Sync, the
 Admin API. Inside this stack run the generators and rake tasks with
 `docker compose exec app bin/rails …`.
 

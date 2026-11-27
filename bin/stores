@@ -1,6 +1,6 @@
 #!/bin/sh
 # Points every store at this catalog in one go, for the devices on your local
-# network: the shelves announce your machine's address, the Batocera and
+# network: the directories announce your machine's address, the Batocera and
 # RetroArch store engines, WE64 (C64) and WEDOS (DOS) come into the catalog from
 # teletypegames.org (the catalog serves the first two with their installers), and
 # a ready disk image and zip carry the last two with their settings. Run it again any time, e.g. when your address changes.
@@ -56,16 +56,16 @@ rails() { docker compose exec -T app bin/rails "$@"; }
 [ -n "$id" ] || id=$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-//; s/-$//')
 
 APP_PORT=$(or_default APP_PORT 8080)
-SHELF_HTTP_PORT=$(or_default SHELF_HTTP_PORT 8090)
-SHELF_FTP_PORT=$(or_default SHELF_FTP_PORT 2121)
+DIRECTORY_HTTP_PORT=$(or_default DIRECTORY_HTTP_PORT 8090)
+DIRECTORY_FTP_PORT=$(or_default DIRECTORY_FTP_PORT 2121)
 catalog="http://$address:$APP_PORT"
 
-echo "1. The catalog and its shelves at $address"
+echo "1. The catalog and its directories at $address"
 set_env STORE_NAME "$name"
-set_env SHELF_HTTP_URL "http://$address:$SHELF_HTTP_PORT"
-set_env SHELF_FTP_URL "ftp://$address:$SHELF_FTP_PORT"
-set_env SHELF_FTP_ADDRESS "$address"
-docker compose up -d --build app shelf-http shelf-ftp >/dev/null 2>&1
+set_env DIRECTORY_HTTP_URL "http://$address:$DIRECTORY_HTTP_PORT"
+set_env DIRECTORY_FTP_URL "ftp://$address:$DIRECTORY_FTP_PORT"
+set_env DIRECTORY_FTP_ADDRESS "$address"
+docker compose up -d --build app directory-http directory-ftp >/dev/null 2>&1
 printf '  waiting for the catalog '
 tries=0
 until curl -fs -o /dev/null "http://localhost:$APP_PORT/api/service"; do
@@ -77,6 +77,6 @@ echo " ok"
 
 echo "2. The store engines and the C64 and DOS clients"
 docker compose exec -T -e STORES_ADDRESS="$address" -e STORES_NAME="$name" -e STORES_ID="$id" -e STORES_LOGO="$logo" \
-  -e APP_PORT="$APP_PORT" -e SHELF_HTTP_PORT="$SHELF_HTTP_PORT" -e SHELF_FTP_PORT="$SHELF_FTP_PORT" \
+  -e APP_PORT="$APP_PORT" -e DIRECTORY_HTTP_PORT="$DIRECTORY_HTTP_PORT" -e DIRECTORY_FTP_PORT="$DIRECTORY_FTP_PORT" \
   app bin/rails runner script/stores.rb
-rails warp_engine:outlets:sync >/dev/null
+rails warp_engine:feeds:sync >/dev/null

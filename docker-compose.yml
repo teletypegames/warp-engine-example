@@ -3,14 +3,14 @@
 #   mysql             the catalog database
 #   app               a Rails host with the warp_engine gem from the TTG gem registry,
 #                     ActiveAdmin + Devise for the admin at /admin
-#   shelf-http        the C64 and Plus/4 shelves over plain HTTP (WE64), port 8090
-#   shelf-ftp         the shelves over FTP (WEDOS), port 2121
+#   directory-http    the C64 and Plus/4 directories over plain HTTP (WE64), port 8090
+#   directory-ftp     the directories over FTP (WEDOS), port 2121
 #
 # The git server (Gitea) and the CI (Woodpecker) are not services here: the
-# engine starts and wires them itself through the Docker socket (WarpEngine 5.5
-# local components, warp-example-gitea / warp-example-woodpecker*).
+# engine starts and wires them itself through the Docker socket (WarpEngine
+# local providers, warp-example-gitea / warp-example-woodpecker*).
 #
-# Everything, wired up (forge, CI, tokens, admin users):
+# Everything, wired up (git server, CI, tokens, admin users):
 #   bin/setup
 #
 # Only the catalog and the admin:
@@ -43,14 +43,14 @@ services:
       SITE_URL: http://localhost:${APP_PORT:-8080}
       FORKS_ALLOW_PRIVATE_ENGINES: ${FORKS_ALLOW_PRIVATE_ENGINES:-0}
       STORE_NAME: ${STORE_NAME:-My Studio}
-      SHELF_HTTP_URL: ${SHELF_HTTP_URL:-http://localhost:8090}
-      SHELF_FTP_URL: ${SHELF_FTP_URL:-ftp://localhost:2121}
+      DIRECTORY_HTTP_URL: ${DIRECTORY_HTTP_URL:-http://localhost:8090}
+      DIRECTORY_FTP_URL: ${DIRECTORY_FTP_URL:-ftp://localhost:2121}
       UPDATE_SECRET: ${UPDATE_SECRET:-example-update-secret}
       FILE_CONTAINER_PATH: /softwares
       IMAGE_CONTAINER_PATH: /images
       GITEA_PORT: ${GITEA_PORT:-3000}
       WOODPECKER_PORT: ${WOODPECKER_PORT:-8000}
-      WARP_ENGINE_VERSION: ${WARP_ENGINE_VERSION:-~> 5.5}
+      WARP_ENGINE_VERSION: ${WARP_ENGINE_VERSION:-~> 6.0}
     depends_on:
       mysql:
         condition: service_healthy
@@ -61,26 +61,26 @@ services:
       - images:/images
       - /var/run/docker.sock:/var/run/docker.sock
 
-  # The shelves (C64, Plus/4, DOS) the engine writes, for the clients that read files
+  # The directories (C64, Plus/4, DOS) the engine writes, for the clients that read files
   # rather than the API: WE64 on a C64 over plain HTTP, WEDOS on DOS over FTP.
-  shelf-http:
+  directory-http:
     build:
-      context: ./shelves
+      context: ./directories
       dockerfile: http.Dockerfile
     ports:
-      - "${SHELF_HTTP_PORT:-8090}:8080"
+      - "${DIRECTORY_HTTP_PORT:-8090}:8080"
     volumes:
       - softwares:/softwares:ro
 
-  shelf-ftp:
+  directory-ftp:
     build:
-      context: ./shelves
+      context: ./directories
       dockerfile: ftp.Dockerfile
     ports:
-      - "${SHELF_FTP_PORT:-2121}:2121"
+      - "${DIRECTORY_FTP_PORT:-2121}:2121"
       - "30000-30009:30000-30009"
     environment:
-      FTP_MASQUERADE: ${SHELF_FTP_ADDRESS:-127.0.0.1}
+      FTP_MASQUERADE: ${DIRECTORY_FTP_ADDRESS:-127.0.0.1}
     volumes:
       - softwares:/softwares:ro
 

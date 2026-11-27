@@ -1,12 +1,12 @@
-"""The shelves over FTP (needs pyftpdlib): anonymous, read-only, passive only.
+"""The directories over FTP (needs pyftpdlib): anonymous, read-only, passive only.
 
 WEDOS, the DOS store client, lists and downloads its programs over FTP; this serves
-the folder the engine writes the shelves into (APPS, C64, PLUS4).
+the folder the engine writes the directories into (APPS, C64, PLUS4).
 
 Settings come from the environment:
 
     FTP_ROOT          the folder to serve; waited for, the engine makes it with
-                      its first shelf                       (default: /shelves)
+                      its first directory                   (default: /directories)
     FTP_HOST          address to listen on                  (default: 0.0.0.0)
     FTP_PORT          control port                          (default: 2121)
     FTP_PASSIVE       passive port range, "first-last"      (default: 30000-30009)
@@ -22,7 +22,7 @@ from pyftpdlib.servers import FTPServer
 
 
 class PassiveOnlyHandler(FTPHandler):
-    banner = "WarpEngine shelves ready."
+    banner = "WarpEngine directories ready."
 
     def ftp_PORT(self, line):
         self.respond("502 Active mode is disabled, use PASV.")
@@ -32,7 +32,7 @@ class PassiveOnlyHandler(FTPHandler):
 
 
 def make_server(env=os.environ):
-    root = os.path.abspath(env.get("FTP_ROOT", "/shelves"))
+    root = os.path.abspath(env.get("FTP_ROOT", "/directories"))
     first, last = (int(p) for p in env.get("FTP_PASSIVE", "30000-30009").split("-"))
 
     authorizer = DummyAuthorizer()
@@ -48,7 +48,7 @@ def make_server(env=os.environ):
 
 
 def main():
-    root = os.environ.get("FTP_ROOT", "/shelves")
+    root = os.environ.get("FTP_ROOT", "/directories")
     while not os.path.isdir(root):
         time.sleep(5)
     make_server().serve_forever()

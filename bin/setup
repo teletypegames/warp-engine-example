@@ -1,7 +1,7 @@
 #!/bin/sh
 # Brings up the whole example stack: the catalog with its admin, then the git
 # server and the CI, which the engine starts and wires itself (WarpEngine local
-# components, through the Docker socket). Run it again any time: what is already
+# providers, through the Docker socket). Run it again any time: what is already
 # set up is left alone.
 #
 #   bin/setup            catalog + git server + CI
@@ -34,7 +34,7 @@ GITEA_PORT=$(or_default GITEA_PORT 3000)
 WOODPECKER_PORT=$(or_default WOODPECKER_PORT 8000)
 
 echo "1. The catalog"
-docker compose up -d --build mysql app shelf-http shelf-ftp
+docker compose up -d --build mysql app directory-http directory-ftp
 wait_for "the catalog" "http://localhost:$APP_PORT/api/service"
 
 if [ "$WITH_CI" = 0 ]; then
@@ -66,7 +66,7 @@ Your studio is up.
   Catalog API     http://localhost:$APP_PORT/api/software
   Gitea           http://localhost:$GITEA_PORT      $GITEA_USER / $GITEA_PASSWORD
   Woodpecker CI   http://localhost:$WOODPECKER_PORT      (sign in through Gitea)
-  Shelves         $(or_default SHELF_HTTP_URL http://localhost:8090) (HTTP, WE64)   $(or_default SHELF_FTP_URL ftp://localhost:2121) (FTP, WEDOS)
+  Directories     $(or_default DIRECTORY_HTTP_URL http://localhost:8090) (HTTP, WE64)   $(or_default DIRECTORY_FTP_URL ftp://localhost:2121) (FTP, WEDOS)
 
 Next: install the WarpEngine Toolbox in VS Code, run "WarpEngine: Set Host…"
 with http://localhost:$APP_PORT, then "WarpEngine: Sign In" and "New Game".

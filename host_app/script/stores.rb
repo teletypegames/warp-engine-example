@@ -10,8 +10,8 @@ name = ENV.fetch("STORES_NAME", "My Studio")
 id = ENV.fetch("STORES_ID", "mystudio")
 logo = ENV.fetch("STORES_LOGO", "")
 app_url = "http://#{address}:#{ENV.fetch('APP_PORT', '8080')}"
-shelf_http_port = ENV.fetch("SHELF_HTTP_PORT", "8090")
-shelf_ftp_port = ENV.fetch("SHELF_FTP_PORT", "2121")
+directory_http_port = ENV.fetch("DIRECTORY_HTTP_PORT", "8090")
+directory_ftp_port = ENV.fetch("DIRECTORY_FTP_PORT", "2121")
 public_dir = Rails.root.join("public/stores")
 
 step = ->(text) { puts "  #{text}" }
@@ -27,7 +27,7 @@ end
 prg_path = Dir[File.join(WarpEngine.config.file_container_path.to_s, "we-c64", clients["we-c64"], "*.prg")].first or raise "no WE64 .prg in the release"
 disk = Studio::D64.new(name[0, 16], "01")
   .add("we64", File.binread(prg_path))
-  .add("we64.cfg", "HOST=#{address}\nPORT=#{shelf_http_port}\nPATH=/C64\n", type: :seq)
+  .add("we64.cfg", "HOST=#{address}\nPORT=#{directory_http_port}\nPATH=/C64\n", type: :seq)
 FileUtils.mkdir_p(public_dir.join("c64"))
 File.binwrite(public_dir.join("c64/#{id}.d64"), disk.to_s)
 step.call("c64/#{id}.d64: WE64 and its WE64.CFG (#{clients['we-c64']})")
@@ -39,7 +39,7 @@ FileUtils.cp(dos_zip, target)
 inside = IO.popen([ "unzip", "-Z1", target.to_s ], &:read).lines.map(&:chomp).find { |entry| File.basename(entry).casecmp?("WEDOS.CFG") } || "WEDOS/WEDOS.CFG"
 Dir.mktmpdir do |dir|
   FileUtils.mkdir_p(File.join(dir, File.dirname(inside)))
-  File.binwrite(File.join(dir, inside), "SERVER=#{address}\r\nPORT=#{shelf_ftp_port}\r\nPATH=/APPS\r\nDEST=C:\\APPS\r\n")
+  File.binwrite(File.join(dir, inside), "SERVER=#{address}\r\nPORT=#{directory_ftp_port}\r\nPATH=/APPS\r\nDEST=C:\\APPS\r\n")
   system("zip", "-q", target.to_s, inside, chdir: dir, exception: true)
 end
 step.call("dos/we-dos.zip: WEDOS and its WEDOS.CFG (#{clients['we-dos']})")
@@ -55,7 +55,7 @@ logo_urls =
     []
   end
 %w[batocera retroarch].each do |client|
-  WarpEngine::StoreClient.for(client).update!(name: name, store_key: id, logo_urls: logo_urls)
+  WarpEngine::ClientConfig.for(client).update!(name: name, store_key: id, logo_urls: logo_urls)
   step.call("#{client}: served by the catalog as #{name} (#{id})")
 end
 

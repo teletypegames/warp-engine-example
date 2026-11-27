@@ -53,14 +53,14 @@ Rails.application.config.to_prepare do
     runtime :emulatorjs, version: "4.2.3"
 
 
-    shelf_http = ENV.fetch("SHELF_HTTP_URL", "http://localhost:8090")
-    shelf_ftp = ENV.fetch("SHELF_FTP_URL", "ftp://localhost:2121")
-    shelf :c64,   kind: "cartridge", path: "shelves/C64", extension: ".PRG", name_length: 16, preview: "c64",
-                  urls: [ "#{shelf_http}/C64" ]
-    shelf :plus4, kind: "cartridge", path: "shelves/PLUS4", extension: ".PRG", name_length: 16,
-                  urls: [ "#{shelf_http}/PLUS4" ]
-    shelf :dos,   kinds: %w[cartridge win_x86], layout: "folders", path: "shelves/APPS",
-                  urls: [ "#{shelf_ftp}/APPS", "#{shelf_http}/APPS" ]
+    directory_http = ENV.fetch("DIRECTORY_HTTP_URL", "http://localhost:8090")
+    directory_ftp = ENV.fetch("DIRECTORY_FTP_URL", "ftp://localhost:2121")
+    directory :c64,   kind: "package", path: "directories/C64", extension: ".PRG", name_length: 16, preview: "c64",
+                      urls: [ "#{directory_http}/C64" ]
+    directory :plus4, kind: "package", path: "directories/PLUS4", extension: ".PRG", name_length: 16,
+                      urls: [ "#{directory_http}/PLUS4" ]
+    directory :dos,   kinds: %w[package win_x86], layout: "folders", path: "directories/APPS",
+                      urls: [ "#{directory_ftp}/APPS", "#{directory_http}/APPS" ]
     TOOLING.each do |platform, repos|
       platform_tooling platform, **repos.transform_values { |path| "#{TOOLING_HOST}/#{path}" }, ref: "master"
     end
@@ -76,12 +76,12 @@ Rails.application.config.to_prepare do
       allow_private_engines ENV["FORKS_ALLOW_PRIVATE_ENGINES"] == "1"
     end
 
-    local_components do
+    local_providers do
       enable
       name_prefix "warp-example"
       network "warp-example"
       engine_url "http://app:3000"
-      forge_port ENV.fetch("GITEA_PORT", "3000")
+      scm_port ENV.fetch("GITEA_PORT", "3000")
       ci_port ENV.fetch("WOODPECKER_PORT", "8000")
     end
 
@@ -97,7 +97,7 @@ Rails.application.config.to_prepare do
       platform :plus4,      builder: BUILDERS[:plus4],      exporter: COMMODORE_PLAYER
       platform :ebitengine, builder: BUILDERS[:ebitengine], web_shell: WEB_SHELLS[:ebitengine]
       platform :tic80,      builder: BUILDERS[:tic80]
-      platform :dos,        builder: BUILDERS[:dos],        forge_release: true
+      platform :dos,        builder: BUILDERS[:dos],        scm_release: true
       platform :electron,   builder: BUILDERS[:electron]
       platform :golang,     builder: BUILDERS[:golang]
       platform :batocera,   builder: BUILDERS[:batocera]

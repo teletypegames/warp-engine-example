@@ -7,7 +7,7 @@ COPY ftpserver.py /app/
 USER nobody
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1 \
-    FTP_ROOT=/softwares/shelves \
+    FTP_ROOT=/softwares/directories \
     FTP_HOST=0.0.0.0 \
     FTP_PORT=2121 \
     FTP_PASSIVE=30000-30009
